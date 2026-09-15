@@ -1,221 +1,282 @@
-## E-Commerce Return Risk Analytics
+# 🛍️ E-Commerce Return Risk Analytics
 
-A transaction-level analytics project for estimating the financial
-risk of e-commerce returns, developed as part of an MSc Data Science
-group project.
+### 💰 Expected Return Loss (ERL) framework for financially prioritising e-commerce returns
 
-Rather than ranking purchases only by how likely they are to be
-returned, the project introduces an Expected Return Loss (ERL) score
-that combines return likelihood, likely return reason, and the financial
-cost associated with that reason.
+A transaction-level analytics project that combines **return probability, return reason and financial impact** to identify the transactions creating the greatest expected return-related financial exposure.
 
-## Business Problem
+Developed as part of an MSc Data Science group project, with my primary contribution focused on the design, implementation and analysis of the **Expected Return Loss (ERL) framework**.
 
-E-commerce returns create costs beyond refunded revenue, including
-return shipping, inspection, restocking, disposal, and markdown losses.
-These costs can vary substantially depending on why a product is
-returned.
+---
 
-A probability-only model treats two transactions with the same return
-probability as equally important. From a business perspective, however,
-a return involving a high-value defective product can create much
-greater financial exposure than a low-cost size-related return.
+## 🎯 Business Problem
 
-This project therefore asks:
+E-commerce returns create costs beyond the refunded purchase price, including:
 
-### Can return probability, return reason, and reason-specific cost be
-### combined into a single transaction-level financial risk score?
+- reverse shipping
+- inspection and processing
+- restocking
+- markdown losses
+- disposal or damaged inventory
 
-## Project Overview
+Traditional return-risk models focus primarily on:
 
-The complete project was designed as a four-stage pipeline:
+> **How likely is this transaction to be returned?**
 
-### Return Probability Modelling (ST1) -- 
-estimates the likelihood that a transaction will be returned.
+However, two transactions with the same return probability can have very different financial consequences.
 
-### Return Reason Classification (ST2) -- 
-estimates the probability distribution across five return reasons.
+This project therefore investigates a different question:
 
-### Expected Return Loss Construction (ST3) -- 
-combines probability, reason distribution, and financial cost into an ERL score.
+> **Which transactions create the greatest expected financial loss if returned?**
 
-### Intervention Evaluation (ST4) -- 
-evaluates whether return-prevention actions are financially worthwhile.
+To address this, the project introduces **Expected Return Loss (ERL)** — a transaction-level financial risk score combining return likelihood, likely return reason and reason-specific cost.
 
-This repository focuses primarily on ST3: Expected Return Loss
-construction, which was my main individual contribution to the group
-project.
+---
 
-## Expected Return Loss Framework
+## 🔄 Project Pipeline
 
-For transaction i, Expected Return Loss is calculated as:
+The complete project was structured as a four-stage analytics pipeline:
+
+| Stage | Purpose |
+|---|---|
+| **ST1 — Return Probability** | Estimate the likelihood that a transaction will be returned |
+| **ST2 — Return Reason Classification** | Estimate probabilities across five potential return reasons |
+| **ST3 — Expected Return Loss** | Combine probability, reason and financial cost into an ERL score |
+| **ST4 — Intervention Evaluation** | Evaluate whether return-prevention actions are financially worthwhile |
+
+### ⭐ My Primary Contribution: ST3 — Expected Return Loss
+
+This repository focuses primarily on **ST3**, where I integrated the outputs from ST1 and ST2 and developed the transaction-level financial risk framework.
+
+---
+
+## 🧮 Expected Return Loss Framework
+
+For transaction *i*:
 
 ### ERLᵢ = P(returnᵢ) × Σᵣ [P(reasonᵣ | i) × C(reasonᵣ)]
 
-where:
+Where:
 
-P(returnᵢ) = estimated return likelihood from ST1
+- **P(returnᵢ)** = estimated probability that transaction *i* is returned
+- **P(reasonᵣ | i)** = probability of return reason *r*
+- **C(reasonᵣ)** = estimated financial cost associated with that reason
 
-P(reasonᵣ | i) = probability of each return reason from ST2
+Five return reasons were modelled:
 
-C(reasonᵣ) = estimated financial cost associated with that
-reason
+- `size_fit`
+- `defect`
+- `expectation_mismatch`
+- `wrong_item`
+- `changed_mind`
 
-The five return-reason categories are:
+Most reason costs use fixed processing estimates.
 
-size_fit
+Defect-related losses additionally depend on transaction value:
 
-defect
+```text
+Defect Cost = £15 + (20% × Order Value)
+```
 
-expectation_mismatch
+As a result, a high-value transaction with moderate return probability can receive a higher ERL than a cheaper transaction with a greater probability of being returned.
 
-wrong_item
+---
 
-changed_mind
+## 📊 Data
 
-Most costs are represented as flat processing estimates. Defect cost is
-value-dependent:
+The framework was evaluated using **85,187 completed transactions** from Google's synthetic **TheLook e-commerce dataset**.
 
-Defect Cost = £15 + 20% × Order Value
+ST3 receives two processed inputs from the preceding stages:
 
-This allows higher-value products with substantial defect exposure to
-receive a higher financial-risk score even when their return probability
-is not especially high.
+```text
+ST1 → Transaction-level return probability
+ST2 → Product-type return-reason probabilities
+```
 
-## Data
+These are integrated with the financial cost assumptions to calculate ERL for every transaction.
 
-The overall framework uses 85,187 completed fictional transactions
-from Google's synthetic TheLook e-commerce dataset.
+Because the underlying transaction data is synthetic, the results should be interpreted as a **proof-of-concept financial risk framework rather than a production retail model**.
 
-## ST3 receives two upstream inputs:
+---
 
-a transaction-level return-likelihood output from ST1
+## ⚙️ ST3 Analytics Pipeline
 
-a product-type return-reason probability matrix from ST2
-
-The project uses synthetic/public data and should be interpreted as a
-prototype rather than a production retail risk model.
-
-ST3 Pipeline
-
-The ST3 notebook performs the following workflow:
-
-ST1 Return Probability Output
-            +
+```text
+ST1 Return Probability
+          +
 ST2 Return Reason Distribution
-            |
-            v
-      Data Validation
-            |
-            v
-       Cost Matrix
-            |
-            v
+          │
+          ▼
+    Data Validation
+          │
+          ▼
+  Financial Cost Matrix
+          │
+          ▼
 Reason-Weighted Expected Cost
-            |
-            v
+          │
+          ▼
  Expected Return Loss (ERL)
-            |
-            v
-  Transaction Risk Ranking
-            |
-            v
-Loss Capture + Risk Tier Analysis
-            |
-            v
-      Output for ST4
+          │
+          ▼
+ Transaction Risk Ranking
+          │
+          ▼
+Loss Capture & Risk Tiers
+          │
+          ▼
+     Output for ST4
+```
 
-The implementation also validates required fields, probability ranges,
-positive order values, reason-probability sums, and product-type
-coverage before calculating financial exposure.
+The pipeline validates required fields, probability ranges, positive order values, reason-probability sums and product-type coverage before calculating financial exposure.
 
-## Key Results
+---
 
-The analysis demonstrates that return likelihood and financial return
-risk are not equivalent.
+## 📈 Key Results
 
-Result                                                           Value
+The analysis showed that **return probability and financial return risk are not equivalent**.
 
-Transactions analysed                                           85,187
-Transactions shifting 1,000+ ranking positions          80,968 (95.0%)
-Top 10% exposure captured using ERL ranking                      16.6%
-Top 10% exposure captured using probability ranking              12.5%
-Gini coefficient -- ERL ranking                                 0.1601
-Gini coefficient -- probability ranking                         0.1058
-Relative Gini improvement                                        1.51×
+| Metric | Result |
+|---|---:|
+| Transactions analysed | **85,187** |
+| Transactions moving >1,000 ranking positions | **80,968 (95.0%)** |
+| Top 10% exposure captured — ERL | **16.6%** |
+| Top 10% exposure captured — Probability only | **12.5%** |
+| Gini coefficient — ERL | **0.1601** |
+| Gini coefficient — Probability only | **0.1058** |
+| Relative Gini improvement | **1.51×** |
 
-Introducing financial cost caused 95% of transactions to move by more
-than 1,000 positions compared with ranking transactions by return
-probability alone.
+### 🔀 95% of Transactions Changed Ranking Substantially
 
-At the top 10% targeting threshold, ERL ranking captured 16.6% of
-total financial exposure, compared with 12.5% using probability-only
-ranking.
+Introducing financial impact caused **80,968 transactions (95.0%)** to move by more than 1,000 positions compared with ranking by return probability alone.
 
-The Gini coefficient increased from 0.1058 to 0.1601, indicating
-greater concentration of financial exposure under the ERL-based ranking.
+This demonstrates that the transactions most likely to be returned are not necessarily the transactions creating the greatest financial exposure.
 
-## Risk Tiers
+---
 
-Transactions are segmented into risk tiers based on ERL. The analysis
-found that observed return rates remained relatively similar across the
-tiers, while average ERL increased substantially.
+## 💷 ERL Captures More Financial Exposure
 
-This illustrates the central insight of the project:
+![Loss Capture Curve](images/ERL_loss_capture_curve.png)
 
-A high-risk transaction is not necessarily one that is more likely
-to be returned; it may instead be one that is considerably more
-expensive if a return occurs.
+When reviewing the **top 10% of transactions**, ERL-based ranking captured:
 
-Defect-related costs were the dominant financial driver for many product
-types, while size/fit exposure was particularly important for some
-categories.
+### **16.6% of total financial exposure**
 
-## Technologies & Skills
+compared with:
 
-Programming & Analysis
+### **12.5% using return probability alone**
 
-Python
+The Gini coefficient also increased from **0.1058 to 0.1601**, representing a **1.51× improvement in financial-risk concentration**.
 
-Pandas
+This suggests that incorporating financial severity provides a more targeted way to prioritise transactions when the business objective is reducing expected return losses.
 
-NumPy
+---
 
-Matplotlib
+## 🔍 What Drives Return Losses?
 
-Jupyter / Google Colab
+![ERL Reason Breakdown](images/ERL_reason_breakdown.png)
 
-### Data Science & Analytics
+Financial exposure was decomposed by return reason and product type.
 
-Data cleaning and validation
+The analysis showed that **defect-related costs were the dominant financial driver across many product categories**, while size/fit exposure was particularly important for selected categories.
 
-Data integration
+This demonstrates one of the main advantages of ERL: it identifies not only **where financial risk is concentrated**, but also **what is driving that exposure**.
 
-Probability-based modelling
+---
 
-Cost-sensitive analytics
+## 🚦 Risk Segmentation
 
-Expected-loss modelling
+Transactions were segmented into five ERL risk tiers:
 
-Risk scoring
+| Risk Tier | Transactions | Average ERL | Total ERL |
+|---|---:|---:|---:|
+| 🟢 Low | 42,675 | £1.74 | £74,114.90 |
+| 🟡 Medium | 21,528 | £2.28 | £49,060.56 |
+| 🟠 High | 12,589 | £2.66 | £33,447.63 |
+| 🔴 Very High | 4,250 | £3.14 | £13,340.58 |
+| 🚨 Critical | 4,145 | £4.20 | £17,394.31 |
 
-Ranking analysis
+Observed return rates remained relatively similar across these tiers, while **average financial exposure increased substantially**.
 
-Sensitivity analysis
+This highlights an important distinction:
 
-Gini coefficient analysis
+> **High financial risk does not necessarily mean high return probability.**
 
-Data visualisation
+A transaction may instead be classified as high risk because the financial consequences of a potential return are substantially greater.
 
-Business-focused interpretation
+---
 
-## Repository Structure
+## 🧪 Model Validation
 
+![ML Validation](images/ERL_ml_validation.png)
+
+The upstream return-probability model had limited discriminatory power, and ERL itself was **not designed as a replacement return classifier**.
+
+Instead, ERL addresses a different business problem:
+
+```text
+Return Probability
+→ How likely is the transaction to be returned?
+
+Expected Return Loss
+→ How much financial exposure does the transaction create?
+```
+
+This distinction is important when interpreting the results: the purpose of ERL is **financial prioritisation**, not simply maximising return-classification accuracy.
+
+---
+
+## 👩‍💻 My Contribution
+
+This was a collaborative MSc Data Science project. My primary responsibility was **ST3 — Expected Return Loss Construction**.
+
+My contribution included:
+
+- designing the ST3 methodology
+- integrating outputs from ST1 and ST2
+- constructing the reason-specific financial cost framework
+- implementing transaction-level ERL calculations in Python
+- developing data-validation checks
+- creating ERL-based transaction rankings
+- developing financial risk tiers
+- comparing ERL with probability-only ranking
+- implementing loss-capture analysis
+- calculating and comparing Gini coefficients
+- conducting sensitivity analysis
+- creating analytical visualisations
+- interpreting ST3 results from a commercial perspective
+- contributing to the final report, review and editing
+
+---
+
+## 🛠️ Technologies & Skills
+
+### 💻 Programming & Data Analysis
+
+`Python` `Pandas` `NumPy` `Matplotlib` `Jupyter` `Google Colab`
+
+### 📊 Analytics
+
+`Data Cleaning` `Data Validation` `Data Integration`  
+`Expected-Loss Modelling` `Risk Scoring` `Cost-Sensitive Analytics`  
+`Ranking Analysis` `Sensitivity Analysis` `Gini Analysis`  
+`Data Visualisation` `Business Analytics`
+
+---
+
+## 📁 Repository Structure
+
+```text
 ecommerce-return-risk-analytics/
 │
 ├── README.md
+│
 ├── notebooks/
 │   └── st3_pipeline_colab.ipynb
+│
+├── images/
+│   ├── ERL_loss_capture_curve.png
+│   ├── ERL_reason_breakdown.png
+│   └── ERL_ml_validation.png
 │
 ├── report/
 │   └── report_group_projectERL.pdf
@@ -223,123 +284,83 @@ ecommerce-return-risk-analytics/
 ├── data/
 │   └── README.md
 │
-├── images/
-│   └── project visualisations
-│
 └── requirements.txt
+```
 
-The original datasets and intermediate outputs may not be included in
-this repository due to file size and project-distribution
-considerations.
+---
 
-## How to Run
+## ▶️ How to Run
 
-The ST3 notebook expects the processed outputs produced by the preceding
-stages of the project.
+ST3 expects the processed outputs generated by the preceding stages:
 
-Main input files used by the notebook include:
-
+```text
 output_p_return.csv
 table10_p_reason_product_type.csv
+```
 
-Install the required Python libraries:
+Install the required libraries:
 
+```bash
 pip install pandas numpy matplotlib
+```
 
 Then open:
 
+```text
 notebooks/st3_pipeline_colab.ipynb
+```
 
-and run the notebook cells sequentially.
+and run the cells sequentially.
 
-If the upstream input files are not included in the repository, the
-notebook serves as a demonstration of the ERL methodology and
-implementation rather than a fully standalone execution environment.
+If the upstream datasets are not included in the repository, the notebook serves as a demonstration of the **ERL methodology, implementation and analytical workflow** rather than a fully standalone execution environment.
 
-## My Contribution
+---
 
-This was a collaborative MSc Data Science project. My primary
-responsibility was Sub-Topic 3: Expected Return Loss (ERL)
-Construction.
+## ⚠️ Limitations
 
-My contribution included:
+This project is a prototype and should not be interpreted as a production-ready retail risk model.
 
-designing and implementing the ST3 methodology
+Key limitations include:
 
-integrating outputs from the return-probability and return-reason
-stages
+- the primary transaction dataset is synthetic
+- the upstream return-probability model did not achieve the project's predefined AUC-ROC validation threshold
+- a scenario-based return score was therefore used in the downstream framework
+- processing-cost assumptions are based on published research rather than retailer-specific accounting data
+- some return-reason categories had limited training signal
+- intervention assumptions were not validated through real-world controlled experiments
 
-constructing the reason-specific financial cost framework
+These limitations mean the **absolute ERL values should not be interpreted as retailer-specific forecasts**. The project primarily demonstrates the methodology and financial prioritisation framework.
 
-implementing the transaction-level ERL calculation in Python
+---
 
-validating the incoming data and pipeline joins
+## 🚀 Future Development
 
-developing ERL-based transaction rankings and risk tiers
+A production implementation could extend the framework through:
 
-comparing ERL ranking with probability-only ranking
+- real historical transaction and return data
+- retailer-specific return-processing costs
+- improved transaction-level return probabilities
+- stronger labelled data for underrepresented return reasons
+- real intervention outcomes from controlled pilots
+- automated risk monitoring
+- category-level return-cost reporting
+- integration with inventory and intervention workflows
+- an interactive Power BI or Tableau decision-support dashboard
 
-implementing loss-capture and Gini analyses
+---
 
-conducting sensitivity analysis
+## 🎓 Academic Context
 
-creating visualisations
+Developed for the **COMP1884 Group Project** as part of the **MSc Data Science and Its Applications** programme at the University of Greenwich.
 
-performing formal analysis and interpretation of ST3 results
+The full academic report is available in the `report/` directory and contains the complete methodology, literature review, assumptions, evaluation and limitations.
 
-contributing to the project report, review, and editing
+---
 
-## Limitations
+## 👤 Author
 
-The results should be interpreted as a prototype and analytical
-demonstration, not as production-ready estimates.
+**Julia Legner**  
+MSc Data Science and Its Applications  
+University of Greenwich
 
-The primary transaction dataset is synthetic. In addition, the
-return-probability model used upstream did not achieve the project's
-predefined AUC-ROC validation threshold, so a scenario-based return
-score was used instead. The reason-specific processing costs are also
-based on published research and assumptions rather than
-retailer-specific accounting data.
-
-A production implementation should therefore use:
-
-real historical transaction and return data
-
-a clearly defined return window
-
-validated transaction-level return probabilities
-
-retailer-specific processing and markdown costs
-
-improved labelled data for underrepresented return reasons
-
-real intervention outcomes from controlled pilots
-
-## Future Improvements
-
-Future development could extend the prototype by incorporating real
-retailer data, validating cost assumptions against operational records,
-improving upstream probability estimates, and deploying the ERL score in
-an interactive dashboard for commercial decision-making.
-
-Potential extensions include Power BI or Tableau dashboards,
-automated risk monitoring, category-level return-cost reporting, and
-integration with intervention or inventory-management workflows.
-
-Academic Context
-
-Developed for the COMP1884 Group Project as part of the MSc Data
-Science and Its Applications programme at the University of Greenwich.
-
-The full academic report is included in the report/ directory for
-methodology, literature review, assumptions, limitations, and complete
-project results.
-
-## Author
-
-Julia Legner
-MSc Data Science and Its Applications
-
-Primary project contribution: Expected Return Loss (ERL) modelling,
-financial risk analytics, Python implementation, formal analysis, and
-visualisation.
+**Primary contribution:** Expected Return Loss modelling • Financial risk analytics • Python implementation • Data visualisation • Business interpretation

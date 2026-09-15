@@ -1,4 +1,4 @@
--Commerce Return Risk Analytics
+## E-Commerce Return Risk Analytics
 
 A transaction-level analytics project for estimating the financial
 risk of e-commerce returns, developed as part of an MSc Data Science
@@ -9,7 +9,7 @@ returned, the project introduces an Expected Return Loss (ERL) score
 that combines return likelihood, likely return reason, and the financial
 cost associated with that reason.
 
-Business Problem
+## Business Problem
 
 E-commerce returns create costs beyond refunded revenue, including
 return shipping, inspection, restocking, disposal, and markdown losses.
@@ -23,34 +23,34 @@ greater financial exposure than a low-cost size-related return.
 
 This project therefore asks:
 
-Can return probability, return reason, and reason-specific cost be
-combined into a single transaction-level financial risk score?
+### Can return probability, return reason, and reason-specific cost be
+### combined into a single transaction-level financial risk score?
 
-Project Overview
+## Project Overview
 
 The complete project was designed as a four-stage pipeline:
 
-Return Probability Modelling (ST1) -- estimates the likelihood
-that a transaction will be returned.
+### Return Probability Modelling (ST1) -- 
+estimates the likelihood that a transaction will be returned.
 
-Return Reason Classification (ST2) -- estimates the probability
-distribution across five return reasons.
+### Return Reason Classification (ST2) -- 
+estimates the probability distribution across five return reasons.
 
-Expected Return Loss Construction (ST3) -- combines probability,
-reason distribution, and financial cost into an ERL score.
+### Expected Return Loss Construction (ST3) -- 
+combines probability, reason distribution, and financial cost into an ERL score.
 
-Intervention Evaluation (ST4) -- evaluates whether
-return-prevention actions are financially worthwhile.
+### Intervention Evaluation (ST4) -- 
+evaluates whether return-prevention actions are financially worthwhile.
 
 This repository focuses primarily on ST3: Expected Return Loss
 construction, which was my main individual contribution to the group
 project.
 
-Expected Return Loss Framework
+## Expected Return Loss Framework
 
 For transaction i, Expected Return Loss is calculated as:
 
-ERLᵢ = P(returnᵢ) × Σᵣ [P(reasonᵣ | i) × C(reasonᵣ)]
+### ERLᵢ = P(returnᵢ) × Σᵣ [P(reasonᵣ | i) × C(reasonᵣ)]
 
 where:
 
@@ -82,12 +82,12 @@ This allows higher-value products with substantial defect exposure to
 receive a higher financial-risk score even when their return probability
 is not especially high.
 
-Data
+## Data
 
 The overall framework uses 85,187 completed fictional transactions
 from Google's synthetic TheLook e-commerce dataset.
 
-ST3 receives two upstream inputs:
+## ST3 receives two upstream inputs:
 
 a transaction-level return-likelihood output from ST1
 
@@ -129,7 +129,7 @@ The implementation also validates required fields, probability ranges,
 positive order values, reason-probability sums, and product-type
 coverage before calculating financial exposure.
 
-Key Results
+## Key Results
 
 The analysis demonstrates that return likelihood and financial return
 risk are not equivalent.
@@ -155,7 +155,7 @@ ranking.
 The Gini coefficient increased from 0.1058 to 0.1601, indicating
 greater concentration of financial exposure under the ERL-based ranking.
 
-Risk Tiers
+## Risk Tiers
 
 Transactions are segmented into risk tiers based on ERL. The analysis
 found that observed return rates remained relatively similar across the
@@ -171,7 +171,7 @@ Defect-related costs were the dominant financial driver for many product
 types, while size/fit exposure was particularly important for some
 categories.
 
-Technologies & Skills
+## Technologies & Skills
 
 Programming & Analysis
 
@@ -185,7 +185,7 @@ Matplotlib
 
 Jupyter / Google Colab
 
-Data Science & Analytics
+### Data Science & Analytics
 
 Data cleaning and validation
 
@@ -209,7 +209,7 @@ Data visualisation
 
 Business-focused interpretation
 
-Repository Structure
+## Repository Structure
 
 ecommerce-return-risk-analytics/
 │
@@ -232,7 +232,7 @@ The original datasets and intermediate outputs may not be included in
 this repository due to file size and project-distribution
 considerations.
 
-How to Run
+## How to Run
 
 The ST3 notebook expects the processed outputs produced by the preceding
 stages of the project.
@@ -256,7 +256,7 @@ If the upstream input files are not included in the repository, the
 notebook serves as a demonstration of the ERL methodology and
 implementation rather than a fully standalone execution environment.
 
-My Contribution
+## My Contribution
 
 This was a collaborative MSc Data Science project. My primary
 responsibility was Sub-Topic 3: Expected Return Loss (ERL)
@@ -289,7 +289,7 @@ performing formal analysis and interpretation of ST3 results
 
 contributing to the project report, review, and editing
 
-Limitations
+## Limitations
 
 The results should be interpreted as a prototype and analytical
 demonstration, not as production-ready estimates.
@@ -315,7 +315,7 @@ improved labelled data for underrepresented return reasons
 
 real intervention outcomes from controlled pilots
 
-Future Improvements
+## Future Improvements
 
 Future development could extend the prototype by incorporating real
 retailer data, validating cost assumptions against operational records,
@@ -335,7 +335,7 @@ The full academic report is included in the report/ directory for
 methodology, literature review, assumptions, limitations, and complete
 project results.
 
-Author
+## Author
 
 Julia Legner
 MSc Data Science and Its Applications
